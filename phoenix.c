@@ -30,6 +30,8 @@
 #include "libbiosext.h"
 #include "lh5_extract.h"
 
+char output_dir[1024];
+
 struct bcpHeader {
 	char signature[6];
 	uint8_t major_revision;
@@ -250,17 +252,22 @@ phx_write_file(unsigned char *BIOSImage, char *filename, short filetype,
 	       int offset, uint32_t length)
 {
 	int fd;
+        char full_path[1068];
 
 	if (filename[0] == '\0') {
 		sprintf(filename, "%s_0x%08x-0x%08x", get_file_type(filetype),
 			offset, offset + length);
 	}
-	fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+
+        strcpy(full_path, output_dir);
+        strcat(full_path, filename);
+        fd = open(full_path, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
         libbiosext_log("Error: unable to open %s: %s\n\n", filename,
 			strerror(errno));
 		return;
 	}
+
 	write(fd, BIOSImage + offset + 0x18, length - 0x18);
 	close(fd);
 }
@@ -288,6 +295,7 @@ static int PhoenixModule(unsigned char *BIOSImage, int BIOSLength, int Offset)
 	unsigned char *ModuleData;
 	uint32_t Packed;
 	int fd;
+        char full_path[1068];
 
 	Module = (struct PhoenixModule *)(BIOSImage + Offset);
 
@@ -371,8 +379,9 @@ static int PhoenixModule(unsigned char *BIOSImage, int BIOSLength, int Offset)
 		filename = malloc(9);
 		sprintf(filename, "%02X_%1d.rom", Module->Type, Module->Id);
 	}
-
-	fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        strcpy(full_path, output_dir);
+        strcat(full_path, filename);
+        fd = open(full_path, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
         libbiosext_log("Error: unable to open %s: %s\n\n", filename,
 			strerror(errno));
@@ -587,11 +596,14 @@ PhoenixVolume1(unsigned char *BIOSImage, int BIOSLength, int Offset, int ModLen)
 	int fd, HoleNum = 0;
 	uint8_t Type;
 	uint32_t Base, Length, NumModules, ModNum;
+        char full_path[1024];
+
+
 
 	Modules = (struct PhoenixVolumeDirEntry *)(BIOSImage + Offset + 0x18);
-	NumModules = (ModLen - 0x18) / sizeof(struct PhoenixVolumeDirEntry);
+        NumModules = (ModLen - 0x18) / sizeof(struct PhoenixVolumeDirEntry);
 
-    libbiosext_log("FFV modules: %u\n", NumModules);
+        libbiosext_log("FFV modules: %u\n", NumModules);
 
 	for (ModNum = 0; ModNum < NumModules; ModNum++) {
 		Type = Modules[ModNum].Type;
@@ -601,15 +613,14 @@ PhoenixVolume1(unsigned char *BIOSImage, int BIOSLength, int Offset, int ModLen)
 		       Type);
 
 		switch (Type) {
-		case 0x01:
-            libbiosext_log("\tHole (raw code)\n");
-			snprintf(Name, sizeof(Name), "hole_%02x.bin",
-				 HoleNum++);
-			fd = open(Name, O_RDWR | O_CREAT | O_TRUNC,
-				  S_IRUSR | S_IWUSR);
-			if (fd < 0) {
-                libbiosext_log("Error: unable to open %s: %s\n\n",
-					Name, strerror(errno));
+                case 0x01:
+                        libbiosext_log("\tHole (raw code)\n");
+                        snprintf(Name, sizeof(Name), "hole_%02x.bin", HoleNum++);
+                        strcpy(full_path, output_dir);
+                        strcat(full_path, Name);
+                        fd = open(full_path, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+                        if (fd < 0) {
+                                libbiosext_log("Error: unable to open %s: %s\n\n", Name, strerror(errno));
 				continue;
 			}
 			write(fd, BIOSImage + Base, Length);
@@ -663,6 +674,7 @@ void PhoenixVolume2(unsigned char *BIOSImage, int BIOSLength, int Offset)
 	char Name[16], guid[37];
 	int fd, HoleNum = 0;
 	uint32_t Base, Length, NumModules, ModNum;
+        char full_path[1024];
 
 	Volume = (struct PhoenixVolumeDir2 *)(BIOSImage + Offset + 0x18);
 	NumModules =
@@ -695,7 +707,9 @@ void PhoenixVolume2(unsigned char *BIOSImage, int BIOSLength, int Offset)
 		} else if (!strcmp(guid, GUID_ESCD)) {
 			/* Extended System Configuration Data (and similar?) */
             libbiosext_log("\tESCD\n");
-			fd = open("ESCD.bin", O_RDWR | O_CREAT | O_TRUNC,
+                        strcpy(full_path, output_dir);
+                        strcat(full_path, "ESCD.bin");
+                        fd = open(full_path, O_RDWR | O_CREAT | O_TRUNC,
 				  S_IRUSR | S_IWUSR);
 			if (fd < 0) {
                 libbiosext_log("Error: unable to open ESCD.bin: %s\n\n",
@@ -709,7 +723,9 @@ void PhoenixVolume2(unsigned char *BIOSImage, int BIOSLength, int Offset)
             libbiosext_log("\tHole (raw code)\n");
 			snprintf(Name, sizeof(Name), "hole_%02x.bin",
 				 HoleNum++);
-			fd = open(Name, O_RDWR | O_CREAT | O_TRUNC,
+                        strcpy(full_path, output_dir);
+                        strcat(full_path, Name);
+                        fd = open(full_path, O_RDWR | O_CREAT | O_TRUNC,
 				  S_IRUSR | S_IWUSR);
 			if (fd < 0) {
                 libbiosext_log("Error: unable to open %s: %s\n\n",

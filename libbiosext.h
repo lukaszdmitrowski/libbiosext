@@ -38,6 +38,8 @@
 #include <inttypes.h>
 #endif
 
+extern char output_dir[1024];
+
 /* bios_extract.c */
 unsigned char *MMapOutputFile(char *filename, int size);
 
@@ -55,8 +57,8 @@ Bool AwardExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 
 int libbiosext_log(const char *const format, ...);
 
-void set_output_directory(const char *dir_path);
+void libbiosext_set_out_dir(const char *dir_path);
 
-int start_bios_extract(const char *bios_rom_path);
+int libbiosext_extract(const char *bios_rom_path);
 
 #endif				/* LIBIOSEXT_H */

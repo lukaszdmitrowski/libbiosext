@@ -31,6 +31,8 @@
 #include "compat.h"
 #include "lh5_extract.h"
 
+char output_dir[1024];
+
 struct AMI95ModuleName {
 	uint8_t Id;
 	char *Name;
@@ -120,6 +122,7 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 	uint32_t Offset;
 	char Date[9];
 	int i;
+        char full_path[1068];
 
 	struct abc {
 		const char AMIBIOSC[8];
@@ -178,7 +181,10 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
         libbiosext_log("0x%05X (%6d bytes) -> amiboot.rom\n", BootOffset,
 	       BIOSLength - BootOffset);
 
-	fd = open("amiboot.rom", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        strcpy(full_path, output_dir);
+        strcat(full_path, "amiboot.rom");
+
+        fd = open(full_path, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
         libbiosext_log("Error: unable to open %s: %s\n\n",
 			"amiboot.rom", strerror(errno));

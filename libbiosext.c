@@ -28,9 +28,7 @@
 #include "compat.h"
 #include "libbiosext.h"
 
-char output_dir[1024];
-
-void set_output_directory(const char *dir_path)
+void libbiosext_set_out_dir(const char *dir_path)
 {
         if (dir_path != 0)
                 strcpy(output_dir, dir_path);
@@ -107,7 +105,7 @@ static struct {
 	"Phoenix SecureCore", "BCPSEGMENT", PhoenixExtract}, {
 NULL, NULL, NULL},};
 
-int start_bios_extract(const char *bios_rom_path)
+int libbiosext_extract(const char *bios_rom_path)
 {
 	int FileLength = 0;
 	uint32_t BIOSOffset = 0;
