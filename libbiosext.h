@@ -20,8 +20,8 @@
 #define LIBIOSEXT_H
 
 #define Bool int
-#define FALSE 0
-#define TRUE  1
+#define BIOSEXT_FALSE 0
+#define BIOSEXT_TRUE  1
 
 #if !defined(le32toh) || !defined(le16toh)
 #if BYTE_ORDER == LITTLE_ENDIAN

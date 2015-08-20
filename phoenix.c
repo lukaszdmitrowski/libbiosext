@@ -786,12 +786,12 @@ Bool PhoenixFFV(unsigned char *BIOSImage, int BIOSLength, struct PhoenixID *FFV)
 
 	if (!Offset) {
         libbiosext_log("BCPFFV module offset is NULL.\n");
-		return FALSE;
+                return BIOSEXT_FALSE;
 	}
 
 	PhoenixFFVDirectory(BIOSImage, BIOSLength, Offset);
 
-	return TRUE;
+        return BIOSEXT_TRUE;
 }
 
 /*
@@ -844,7 +844,7 @@ PhoenixExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 
 	if (!SYS) {
         libbiosext_log("Error: Failed to locate BCPSYS offset.\n");
-		return FALSE;
+                return BIOSEXT_FALSE;
 	}
 
 	/* BCPCMP parsing */
@@ -852,7 +852,7 @@ PhoenixExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 	unsigned char *bcpcmp = memmem(BIOSImage, BIOSLength - 6, "BCPCMP", 6);
 	if (!bcpcmp) {
         libbiosext_log("Error: Failed to locate BCPCMP offset.\n");
-		return FALSE;
+                return BIOSEXT_FALSE;
 	}
 
 	uint32_t bcpoff = bcpcmp - BIOSImage;
@@ -877,7 +877,7 @@ PhoenixExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 	if (!Offset) {
         libbiosext_log("BCPSYS module offset is NULL.\n");
 		if (!FFV) {
-			return FALSE;
+                        return BIOSEXT_FALSE;
 		}
 		return PhoenixFFV(BIOSImage, BIOSLength, FFV);
 	}
@@ -887,5 +887,5 @@ PhoenixExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 		Offset &= BIOSLength - 1;
 	}
 
-	return TRUE;
+        return BIOSEXT_TRUE;
 }

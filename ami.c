@@ -160,7 +160,7 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
             libbiosext_log("Error: This is an AMI '94 (1010) BIOS Image.\n");
 		else
             libbiosext_log("Error: This is an AMI '94 BIOS Image.\n");
-		return FALSE;
+                return BIOSEXT_FALSE;
 	}
 
 	/* now the individual modules */
@@ -188,7 +188,7 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 	if (fd < 0) {
         libbiosext_log("Error: unable to open %s: %s\n\n",
 			"amiboot.rom", strerror(errno));
-		return FALSE;
+                return BIOSEXT_FALSE;
 	}
 
 	write(fd, BIOSImage + BootOffset, BIOSLength - BootOffset);
@@ -208,13 +208,13 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 		part = (struct part *)(BIOSImage + (Offset - BIOSOffset));
 
 		if (part->IsComprs & 0x80)
-			Compressed = FALSE;
+                        Compressed = BIOSEXT_FALSE;
 		else
-			Compressed = TRUE;
+                        Compressed = BIOSEXT_TRUE;
 
 		/* even they claim they are compressed they arent */
 		if ((part->PartID == 0x40) || (part->PartID == 0x60))
-			Compressed = FALSE;
+                        Compressed = BIOSEXT_FALSE;
 
 		if (part->PartID == 0x20) {
 			uint16_t vid = le32toh(part->RealCS) & 0xFFFF;
@@ -262,7 +262,7 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 
 		Buffer = MMapOutputFile(filename, BufferSize);
 		if (!Buffer)
-			return FALSE;
+                        return BIOSEXT_FALSE;
 
 		if (Compressed)
 			LH5Decode(BIOSImage + (Offset - BIOSOffset) + 0x14,
@@ -287,5 +287,5 @@ AMI95Extract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 			    le16toh(part->PrePartLo);
 	}
 
-	return TRUE;
+        return BIOSEXT_TRUE;
 }

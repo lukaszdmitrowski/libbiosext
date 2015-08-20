@@ -52,7 +52,7 @@ AwardExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 					    &BufferSize, &PackedSize, &filename,
 					    &crc);
 		if (!HeaderSize)
-			return FALSE;
+                        return BIOSEXT_FALSE;
 
         libbiosext_log("0x%05X (%6d bytes)    ->    %s  \t(%6d bytes)\n",
 		       (unsigned int)(p - BIOSImage), HeaderSize + PackedSize,
@@ -60,7 +60,7 @@ AwardExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 
 		Buffer = MMapOutputFile(filename, BufferSize);
 		if (!Buffer)
-			return FALSE;
+                        return BIOSEXT_FALSE;
 
 		LH5Decode(p + HeaderSize, PackedSize, Buffer, BufferSize);
 
@@ -69,5 +69,5 @@ AwardExtract(unsigned char *BIOSImage, int BIOSLength, int BIOSOffset,
 		p += HeaderSize + PackedSize;
 	}
 
-	return TRUE;
+        return BIOSEXT_TRUE;
 }
